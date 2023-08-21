@@ -6,7 +6,7 @@ const siteMetadata = {
   description: '웹 프론트엔드 개발자 박준형입니다. How보다는 Why를 중요하다고 생각합니다.',
   language: 'ko-kr',
   theme: 'system', // system, dark or light
-  siteUrl: 'https://tailwind-nextjs-starter-blog.vercel.app',
+  siteUrl: 'https://www.dev-bbak.site/',
   siteRepo: 'https://github.com/timlrx/tailwind-nextjs-starter-blog',
   siteLogo: '/static/images/logo.png',
   socialBanner: '/static/images/twitter-card.png',
