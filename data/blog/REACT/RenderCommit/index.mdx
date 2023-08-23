@@ -7,7 +7,7 @@ tags: ['REACT']
 
 해당 글은 [리액트 베타문서 Render and Commit](https://beta.reactjs.org/learn/render-and-commit) 번역입니다
 
-![](./react.png)
+![](/static/images/REACT/RenderCommit/react.png)
 
 당신의 컴포넌트가 화면에 표현되기 전에, 그들은 반드시 React에 의해 렌더링된다.이 프로세스의 단계를 이해하면 내 코드가 어떻게 실행되는지와 동작을 설명하는데 많은 도움이 될것이다.
 
@@ -27,7 +27,7 @@ tags: ['REACT']
 - **Rendering the component** (주방에서 주문을 준비한다)
 - **Committing to the DOM** (손님 테이블에 요리를 내놓는다)
 
-![](./initialRender.png)
+![](/static/images/REACT/RenderCommit/initialRender.png)
 
 ## Trigger a render
 
@@ -52,7 +52,7 @@ createRoot(document.getElementById('root')).render(<App />)
 
 초기 렌더링이 완료된 컴포넌트는 setter 함수로 상태를 업데이트하여 리렌더링을 트리거할수있다. 컴포넌트의 상태를 업데이트하면 자동으로 렌더큐에 대기하게 된다. (레스토랑의 손님이 차, 디저트등을 첫 주문이후 주문하는것으로 상상하면된다.)
 
-![](./reRender.png)
+![](/static/images/REACT/RenderCommit/reRender.png)
 
 ## Rendering the component
 
@@ -115,4 +115,4 @@ jsx에 지난번과 동일한 위치에 input 내용이 나타나는것을 확�
 
 렌더링이 완료된후 React가 Real Dom을 업데이트하면 브라우저는 화면을 Repainting한다. 이 프로세스를 브라우저 렌더링이라고 하지만, 나머지 문서에서 혼동을 방지하기 위해 painting이라고 부를것이다.
 
-![](./paint.png)
+![](/static/images/REACT/RenderCommit/paint.png)
