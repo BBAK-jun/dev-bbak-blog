@@ -9158,6 +9158,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"prismjs@npm:^1.21.0":
+  version: 1.29.0
+  resolution: "prismjs@npm:1.29.0"
+  checksum: 007a8869d4456ff8049dc59404e32d5666a07d99c3b0e30a18bd3b7676dfa07d1daae9d0f407f20983865fd8da56de91d09cb08e6aa61f5bc420a27c0beeaf93
+  languageName: node
+  linkType: hard
+
 "process-nextick-args@npm:~2.0.0":
   version: 2.0.1
   resolution: "process-nextick-args@npm:2.0.1"
@@ -9261,6 +9268,17 @@ __metadata:
   version: 16.13.1
   resolution: "react-is@npm:16.13.1"
   checksum: f7a19ac3496de32ca9ae12aa030f00f14a3d45374f1ceca0af707c831b2a6098ef0d6bdae51bd437b0a306d7f01d4677fcc8de7c0d331eb47ad0f46130e53c5f
+  languageName: node
+  linkType: hard
+
+"react-notion@npm:^0.10.0":
+  version: 0.10.0
+  resolution: "react-notion@npm:0.10.0"
+  dependencies:
+    prismjs: ^1.21.0
+  peerDependencies:
+    react: ">=16"
+  checksum: cc5f0b051957a0b54b0661ec810b5eef6c057ebd1d4e51ce26d40a93583b366511fdb2689ff86c030eb6e78d9679d4cc6947e9bc323162b4db1efeee6a8a29ab
   languageName: node
   linkType: hard
 
@@ -10734,6 +10752,7 @@ __metadata:
     prettier-plugin-tailwindcss: ^0.4.1
     react: 18.2.0
     react-dom: 18.2.0
+    react-notion: ^0.10.0
     reading-time: 1.5.0
     rehype-autolink-headings: ^6.1.0
     rehype-citation: ^1.0.2
