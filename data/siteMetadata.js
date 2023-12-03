@@ -3,13 +3,13 @@ const siteMetadata = {
   title: 'dev-bbak',
   author: 'JunHyeong Park',
   headerTitle: 'dev-bbak',
-  description: '웹 프론트엔드 개발자 박준형입니다. How보다는 Why를 중요하다고 생각합니다.',
+  description: '함께 일하고 싶은 환경을 만들어가는 Software Engineer 박준형입니다.',
   language: 'ko-kr',
-  theme: 'system', // system, dark or light
+  theme: 'light', // system, dark or light
   siteUrl: 'https://www.dev-bbak.site/',
-  siteRepo: 'https://github.com/timlrx/tailwind-nextjs-starter-blog',
+  siteRepo: 'https://github.com/wnsguddl789/dev-bbak-blog',
   siteLogo: '/static/images/logo.png',
-  socialBanner: '/static/images/twitter-card.png',
+  socialBanner: '/static/images/avatar.jpeg',
   mastodon: 'https://mastodon.social/@mastodonuser',
   email: 'wnsguddl789@gmail.com',
   github: 'https://github.com/wnsguddl789',

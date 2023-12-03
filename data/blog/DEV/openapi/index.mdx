@@ -2,8 +2,10 @@
 title: 'OpenApi Specification Generator 도입'
 date: '2023-11-19T15:21:03.284Z'
 summary: '일을 두번하는것이 정말 싫었던 개발자의 고민'
-tags: ['DEV']
+tags: ['DEV', 'OpenApi', 'Swagger', 'NestJS', 'TypeScript']
 ---
+
+![](/static/images/DEV/openapi/api.png)
 
 ## 도입 배경
 
@@ -14,8 +16,6 @@ tags: ['DEV']
 타 프로젝트로 투입되기 이전에는 백엔드 개발자도 있으니 아래의 순서대로 개발을 시작할 예정이었다.
 
 h-vat에는 레거시를 개편하는 프로젝트이므로 기획자가 존재하지않다. 프론트엔드가 UI 개발만을 하는것이 아니라 백엔드와 연결되어있는 개발 영역이 있는 경우에, 프론트엔드와 백엔드 개발자가 API 스펙을 사전에 협의해야한다.
-
-![](/static/images/DEV/openapi/api.png)
 
 ### API설계는 어떻게 할까?
 
@@ -103,24 +103,9 @@ h-vat에는 레거시를 개편하는 프로젝트이므로 기획자가 존재�
 
 ![](/static/images/DEV/openapi/tobeBack.png)
 
-**AS-IS**
+![](/static/images/DEV/openapi/asis.png)
 
-|                   | backend                | frontend              |
-| ----------------- | ---------------------- | --------------------- |
-| 헬스체크          | fetchLoginUser         | fetchAuth             |
-| 로그인            | userLogin              | login                 |
-| 로그아웃          | userLogout             | logout                |
-| 액세스토큰 검증   | 존재하지않음           | validationAccessToken |
-| 액세스토큰 재발급 | restoreUserAccessToken | restoreAccessToken    |
-
-**TO-BE**
-
-|                   | backend            | frontend           |
-| ----------------- | ------------------ | ------------------ |
-| 로그인            | login              | login              |
-| 로그아웃          | logout             | logout             |
-| 액세스토큰 검증   | healthCheck        | healthCheck        |
-| 액세스토큰 재발급 | restoreAccessToken | restoreAccessToken |
+![](/static/images/DEV/openapi/tobe.png)
 
 서버와 클라이언트의 메서드명의 Align이 맞춰졌다. 그리고 여기서 기대되는 효과가 하나있다. 서버에서 방치되던 api를 삭제할시 클라이언트측에서도 해당 api가 삭제되므로 타입스크립트의 컴파일러가 이를 잡아 프론트엔드 개발자는 사라진 api를 항상 추적할수 있게된다.
 
@@ -194,8 +179,6 @@ API를 정의한 파일을 가져올 수 있는 도구를 사용한다면 대부
 
 그리고 추가로 바라는 것은 문서의 단일화다. 본인은 동료들을 믿지만 위에서 말했듯 휴먼에러는 언제나 발생할 수 있고, 인적자원은 항상 불안적 존재임에는 틀림없다. 이를 제도 혹은 도구로 강제하여 방지할 수 있고 개발 및 스펙문서 작성 시간 단축까지 이어진다면 좋을 경험이 될것이다.
 
-{' '}
-
 <hr />
 
 ### 참고자료
@@ -203,5 +186,3 @@ API를 정의한 파일을 가져올 수 있는 도구를 사용한다면 대부
 [Code-First vs. Design-First: Eliminate Friction with API Exploration](https://swagger.io/blog/code-first-vs-design-first-api/)
 
 [Understanding  the API-First Approach to Building Products](https://swagger.io/resources/articles/adopting-an-api-first-approach/)
-
-[[휴톰] 회고글: Medical Data Manager 근영님](https://www.linkedin.com/pulse/%25ED%259C%25B4%25ED%2586%25B0-%25ED%259A%258C%25EA%25B3%25A0%25EA%25B8%2580-medical-data-manager-%25EA%25B7%25BC%25EC%2598%2581%25EB%258B%2598-hutom?trackingId=MIbe%2BJSpeyDYNwV%2Bh4OzKQ%3D%3D/?trackingId=MIbe+JSpeyDYNwV+h4OzKQ==)
