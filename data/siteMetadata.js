@@ -9,7 +9,7 @@ const siteMetadata = {
   siteUrl: 'https://www.dev-bbak.site/',
   siteRepo: 'https://github.com/wnsguddl789/dev-bbak-blog',
   siteLogo: '/static/images/logo.png',
-  socialBanner: '/static/images/avatar.jpeg',
+  socialBanner: '/static/images/banner.png',
   mastodon: 'https://mastodon.social/@mastodonuser',
   email: 'wnsguddl789@gmail.com',
   github: 'https://github.com/wnsguddl789',
