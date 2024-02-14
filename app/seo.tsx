@@ -15,16 +15,11 @@ export function genPageMetadata({ title, description, image, ...rest }: PageSEOP
     openGraph: {
       title: `${title} | ${siteMetadata.title}`,
       description: description || siteMetadata.description,
-      url: './',
+      url: `./og?title=${title}&description=${description}`,
       siteName: siteMetadata.title,
       images: image ? [image] : [siteMetadata.socialBanner],
       locale: 'en_US',
       type: 'website',
-    },
-    twitter: {
-      title: `${title} | ${siteMetadata.title}`,
-      card: 'summary_large_image',
-      images: image ? [image] : [siteMetadata.socialBanner],
     },
     ...rest,
   }
