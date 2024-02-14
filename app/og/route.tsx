@@ -4,6 +4,7 @@ export const runtime = 'edge'
 
 export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url)
     const title = searchParams.has('title') ? searchParams.get('title')?.slice(0, 100) : 'Dev-bbak'
     const description = searchParams.has('description')
       ? searchParams.get('description')?.slice(0, 100)
