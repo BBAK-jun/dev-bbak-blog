@@ -6,7 +6,7 @@ draft: false
 summary: 흩어져있는 프론트엔드 한곳으로 뭉치기
 ---
 
-## **도입 배경**
+# **도입 배경**
 
 안녕하세요. 휴톰 프론트엔드 개발자 박준형입니다.
 
@@ -24,19 +24,19 @@ summary: 흩어져있는 프론트엔드 한곳으로 뭉치기
 
 제품마다 배포전략과 브랜치 전략을 픽스하며 문서로 마련하고, 이러한 브랜치 전략 까지 하나의 코드베이스에서 관리를 한다면, 전략이 표준화되고 업무 프로세스까지 마련되어 정신적인 스트레스또한 사라지지 않을까하여 모노레포를 도입하게 되었습니다.
 
-### 모노레포를 도입하여 얻게되는 이점
+## 모노레포를 도입하여 얻게되는 이점
 
 - 비슷한 제품군을 하나의 저장소에서 관리
   - 공통 모듈, 헬퍼, 유틸 함수를 함께 사용이 가능합니다.
   - 서로 의존적인 패키지의 리팩토링 비용감소
 - 신규 제품 프로젝트를 생성할때마다 발생하는 오버헤드 절감
-  - (레포지토리 생성 → 커미터 생성 → 개발환경 세팅 → CI/CD 구축 → 빌드 → publish) 과정생략
+  - 레포지토리 생성 → 커미터 생성 → 개발환경 세팅 → CI/CD 구축 → 빌드 → publish 과정생략
 - 관리포인트가 단일화
 - 코드스타일 통일화
   - 커미터 생성에서 린트 및 프리티어 설정을 하는데 레포지토리 기준으로 룰을 정하니 스타일 통일화 기대할수있다.
   - 한조직이 개발했지만 한 사람이 개발한것과 같은 퀄리티의 코드스타일 통일성을 기대할수 있습니다.
 
-### 모노레포를 도입하여 우려되는 점
+## 모노레포를 도입하여 우려되는 점
 
 - 기존에 사용중인 **GitFlow** 브랜치 전략 사용 불가
   - 서비스마다 develop브랜치와 main 브랜치를 만들기에는 현실적으로 어려움
@@ -70,27 +70,17 @@ summary: 흩어져있는 프론트엔드 한곳으로 뭉치기
 - 이를 해결하기위해 오른쪽트리처럼 원래의 트리의 모양을 바꿉니다.
   - 이렇게 되면서 package-1에서 직접 require(’B’)가 가능해졌습니다.
   - 직접의존하지않는 라이브러리를 require할수있는 현상을 유령 의존성이라고합니다.
-  - 이는 package.json에서 제거했을때 소리없이 사라지며 의존성관리 시스템을 혼란스럽게 만듭니다.
+  - 이는 package.json**에서 제거했을때 소리없이 사라지며 의존성관리 시스템을 혼란스럽게 만듭니다.**
 
 이를 해결할 수 있는 방법은 크게 두가지입니다. Yarn Berry와 Pnpm입니다. Yarn Berry는 Plug’n Play 전략을 통해 중복 저장 문제를 해결하며 호이스팅 방법을 사용하지않는것이 기본값입니다. 하지만 저희가 선택한 패키지매니저는 Pnpm입니다.
 
 선택한 이유부터 말하면, 뒤에서 선택하게된 **TurboRepo**에서는 현재까지 Yarn Berry의 Plug’n Play을 지원하지 않기 때문입니다. Pnpm이라는 선택지가 남았으며, Pnpm의 매력을 찾기로했습니다.
 
-### 패키지 매니저 벤치마킹
+## 패키지 매니저 벤치마킹
 
 아래의 테이블은 pnpm 문서에서 제공되는 패키지파일 설치 속도 비교 벤치마킹 입니다
 
-| action  | cache | lockfile | node_moduels | npm   | pnpm  | Yarn(nm) | Yarn(PnP) |
-| ------- | ----- | -------- | ------------ | ----- | ----- | -------- | --------- |
-| install | ✔    | ✔       | ✔           | 2s    | 1.5s  | 695ms    | n/a       |
-| install | ✔    | ✔       |              | 8.9s  | 4.7s  | 8.8s     | 668ms     |
-| install | ✔    |          | ✔           | 2.4s  | 3.8s  | 16s      | n/a       |
-| install | ✔    |          |              | 13.7s | 8s    | 22.8s    | 15.2s     |
-| install |       | ✔       | ✔           | 2s    | 1.5s  | 681ms    | n/a       |
-| install |       | ✔       |              | 14.2s | 14.1s | 8.9s     | 670ms     |
-| install |       |          | ✔           | 2.3s  | 13s   | 16.6s    | n/a       |
-| install |       |          |              | 51.8s | 16.4s | 22.1s    | 20.2s     |
-| update  | n/a   | n/a      | n/a          | 8.9s  | 6.9s  | 8.7s     | 16.9s     |
+![](/static/images/DEV/hutom-monorepo/bench-mark.png)
 
 cache가 있는경우에는 초록색, 없는 경우에는 노란색으로 구분했습니다. Yarn(PnP)는 선택지에 없으므로 배제하고 보시면됩니다.
 
@@ -154,12 +144,6 @@ node_modules
 
 TurboRepo의 주요 미션은 모노레포 환경에서 개발자가 조금 더 쉽고 빠르게 개발할 수 있도록 빌드 도구를 제공하는것입니다.
 
-## Incremental Builds
-
-![](/static/images/DEV/hutom-monorepo/turbo-cache.png)
-
-- 작업 진행을 캐싱하여 이미 계산된 내용은 skip 하는것을 의미합니다.
-
 ## Content-aware-hashing
 
 - 타임스탬프가 아닌 콘텐츠를 인식하는 방식으로 해싱을 지원합니다.
@@ -176,24 +160,24 @@ TurboRepo의 주요 미션은 모노레포 환경에서 개발자가 조금 더 
 ```markdown
 ├── apps
 | ├── research-db // design-system, research-db-oas 사용
-| | ├── src/\*\*
+| | ├── src/..
 | | ├── package.json
 | |
 | ├── surggram // design-system, surggram-oas 사용
-| ├── src/**
+| ├── src/..
 | ├── package.json
 |
 ├── packages
 | ├── design-system
-| | ├── src/**
+| | ├── src/..
 | | ├── package.json
 | |
 | ├── research-db-oas
-| | ├── src/\*\*
+| | ├── src/..
 | | ├── package.json
 | |
 | ├── surggram-oas
-| ├── src/\*\*
+| ├── src/..
 | ├── package.json
 |
 ├── pnpm-lock.yaml // 전역 락 파일!
@@ -203,40 +187,40 @@ TurboRepo의 주요 미션은 모노레포 환경에서 개발자가 조금 더 
 
 터보레포를 사용하지않고 workspace 필드만을 사용해서 Docker 이미지를 만들어야하는 상황을 생각해봅시다.
 
-- **Dockerfile (Prune 사용 X)**
+**Dockerfile (Prune 사용 X)**
 
-  ```docker
-  FROM node:18-alpine AS base
+```docker
+FROM node:18-alpine AS base
 
-  FROM base AS builder
-  WORKDIR /app
-  COPY . .
+FROM base AS builder
+WORKDIR /app
+COPY . .
 
-  FROM base AS installer
-  WORKDIR /app
+FROM base AS installer
+WORKDIR /app
 
-  # 필요한 패키지들을 복사
-  COPY --from=builder /app/apps/surggram/ . ./apps/surggram
-  COPY --from=builder /app/package/design-system/ . ./package/design-system
-  COPY --from=builder /app/package/surggram-oas/ . ./package/surggram-oas
+# 필요한 패키지들을 복사
+COPY --from=builder /app/apps/surggram/ . ./apps/surggram
+COPY --from=builder /app/package/design-system/ . ./package/design-system
+COPY --from=builder /app/package/surggram-oas/ . ./package/surggram-oas
 
-  # 여기서 문제 발생!
-  COPY --from=builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+# 여기서 문제 발생!
+COPY --from=builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 
-  # 패키지 설치
-  RUN pnpm install
+# 패키지 설치
+RUN pnpm install
 
-  # Build the project
-  WORKDIR /app/apps/surggram
-  RUN pnpm build
+# Build the project
+WORKDIR /app/apps/surggram
+RUN pnpm build
 
-  # Stand Alone 설정으로 Runner Stage
-  FROM base AS runner
+# Stand Alone 설정으로 Runner Stage
+FROM base AS runner
 
-  # 중간 생략
+# 중간 생략
 
-  CMD node apps/surggram/server.js
-  ```
+CMD node apps/surggram/server.js
+```
 
 어찌저찌해서 필요한 패키지들을 빌드와 인스톨 스테이지에 모아왔다고 가정해봅시다. 하지만 모노레포 빌드 환경에서 락파일은 전역에 존재합니다. 락파일은 가지치기가 되어있지않아 빌드타겟인 SurgGram 패키지의 의존성만 설치되는것이 아니라 불필요한 의존성까지 설치될것입니다.
 
@@ -249,16 +233,16 @@ TurboRepo의 주요 미션은 모노레포 환경에서 개발자가 조금 더 
 ```markdown
 ├── apps
 | ├── surggram // design-system, surggram-oas 사용
-| ├── src/\*\*
+| ├── src/..
 | ├── package.json
 |
 ├── packages
 | ├── design-system
-| | ├── src/\*\*
+| | ├── src/..
 | | ├── package.json
 | |
 | ├── surggram-oas
-| ├── src/\*\*
+| ├── src/..
 | ├── package.json
 |
 ├── pnpm-lock.yaml // 가지치기된 전역 락 파일!
@@ -274,21 +258,22 @@ TurboRepo의 주요 미션은 모노레포 환경에서 개발자가 조금 더 
 
 더욱 매력적인것은 —docker 옵션입니다. 이 옵션을 사용하면 아래와 같이 뽑아줍니다.
 
-```markdown
+```txt
 ├── full // 집중!!
 | ├── apps
 | | ├── surggram
-| | ├── src/**
+| | ├── src/..
 | | ├── package.json
 | |
 | ├── packages
 | ├── design-system
-| | ├── src/**
+| | ├── src/..
 | | ├── package.json
 | |
 | ├── surggram-oas
-| ├── src/\*\*
+| ├── src/..
 | ├── package.json
+|
 ├── json // 집중!!
 | ├── apps
 | | ├── surggram
@@ -323,22 +308,40 @@ full 디렉터리에서 package.json 파일만을 가져와서 만들어진 json
 
 ![](/static/images/DEV/hutom-monorepo/remote-cache.png)
 
-@박준형 TODO 터보레포 클라우드 캐싱 관련 위키 작성
+### 리모트 캐시 API 제작
 
-https://github.com/ducktors/turborepo-remote-cache
+터보레포에서는 리모트 캐시를 사용하기 위해서는 API 사양을 충족하는 모든 HTTP 서버에서 구현할 수 있다고 안내합니다. Vercel에서 제공하는 원격캐시를 사용할 수 도있지만,
+굳이 Pro나 Enterprise 요금제를 사용하기가 껄끄럽기도하며 병원 및 환자의 데이터의 안전을 위해 안전한 API 서버를 만들기로 합니다.
 
-[Home](https://ducktors.github.io/turborepo-remote-cache/)
+[turborepo-remote-cach](https://github.com/ducktors/turborepo-remote-cache)에서 제공해주는 소스코드를 사용하면됩니다.
 
-## Parallel execution
+![](/static/images/DEV/hutom-monorepo/supported-storage-provider.png)
 
-- 모든 코어를 사용하는 병렬 실행이 목표입니다.
-- 지정된 태스크 단위로 의존성을 판단하여 최대한 병렬적으로 작업을 진행합니다.
+fastify를 기반으로 구성되어 미리 구현되어있는 엔드포인트를 통해 따로 작업없이 서버를 띄우는것만으로도 원격캐싱이 지원되며, 현재 휴톰에서 사용중인 **Google Cloud Storage**서비스를 사용할 수 있습니다.
+
+커스텀 캐시 서버를 구축하는 과정은 다음과 같습니다.
+
+1. [turborepo-remote-cach](https://github.com/ducktors/turborepo-remote-cache)에서 소스코드를 클론합니다.
+2. Storage-Provider를 위한 설정 및 기타 환경변수를 입력합니다.
+3. Docker Image를 만들어 Cloud Run과 같은 서버리스 호스팅 서비스에서 제공합니다.
+
+커스텀 캐시 서버를 구축했으니 커스텀 캐시를 사용하는 방법은 굉장히 간단합니다.
+
+Turborepo의 루트 디렉토리에 `.turbo/config.json` 파일을 생성하여 아래와 같은 정보를 입력합니다.
+
+- teamid : 커스텀 캐시 서버의 teamid를 기입합니다.
+- token : 커스텀 캐시 서버의 token를 기입합니다.
+- apiurl : 커스텀 캐시 서버의 Url을 기입합니다.
+
+![](/static/images/DEV/hutom-monorepo/result-remote-cache.png)
+
+마지막 줄을 보면 `Remote caching enabled`라는 문구가 있습니다! 이로서 리모트캐시를 제공하는 http 서버는 생성했습니다.
 
 # 버전 관리
 
 휴톰에서 만들어지고 있는 제품들을 이해하기 위해서는 제품의 버전을 먼저 이해해야합니다! 우리는 한 제품을 만들기위해 여러부서와 버전의 컨텍스트를 공유합니다.
 
-제품의 통일된 버전 정책을 가지기 위해서는 유의적인 버전을 사용해야합니다. **[유의적 버전](https://semver.org/lang/ko/)**이란 제품에 버전을 어떻게 부여하고 관리해야하는지에 대한 규칙입니다.
+제품의 통일된 버전 정책을 가지기 위해서는 유의적인 버전을 사용해야합니다. [유의적 버전](https://semver.org/lang/ko/)이란 제품에 버전을 어떻게 부여하고 관리해야하는지에 대한 규칙입니다.
 
 휴톰에서는 유의적버전을 사용하지만 여러 유관부서와 협업을 해야하기때문에 **pre-release-version**과 **pre-release-code**가 일반적인 유의적버전과는 다르게 사용하고있습니다.
 
@@ -355,8 +358,6 @@ https://github.com/ducktors/turborepo-remote-cache
 - **build**는 PLT 팀이 **stage**에서 몇번째 빌드했는지를 명시합니다.
   - **build** 정보는 자연수로 표기하며 **stage**가 변경되어도 **build** 숫자는 초기화 하지 않습니다.
   - ex) `v1.0.0-vnv1-build1`, `v1.0.0-vnv1-build2`, `v1.0.0-vnv2-build3`
-
-휴톰에서의 버전관리에 대한 자세한 내용은 [Hutom 소프트웨어 버전규칙 문서](https://drive.google.com/file/d/1j2LzQtrbChlHs_tTUqtI3Dpl3LMSKvLr/view)를 참고하시면 됩니다 🙂
 
 # 브랜치 전략 비교
 
