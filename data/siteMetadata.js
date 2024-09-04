@@ -3,7 +3,7 @@ const siteMetadata = {
   title: 'dev-bbak',
   author: 'JunHyeong Park',
   headerTitle: 'dev-bbak',
-  description: '함께 일하고 싶은 환경을 만들어가는 Software Engineer 박준형입니다.',
+  description: 'Frontend Engineer - 박준형',
   language: 'ko-kr',
   theme: 'light', // system, dark or light
   siteUrl: 'https://www.dev-bbak.site/',
@@ -85,4 +85,4 @@ const siteMetadata = {
   },
 }
 
-module.exports = siteMetadata
+export default siteMetadata
