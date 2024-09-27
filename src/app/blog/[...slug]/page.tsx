@@ -27,7 +27,7 @@ export async function generateMetadata({
   params,
 }: {
   params: { slug: string[] }
-}): Promise<Metadata | undefined> {
+}): Promise<Metadata | void> {
   const slug = decodeURI(params.slug.join('/'))
   const post = allBlogs.find((p) => p.slug === slug)
   const authorList = post?.authors || ['default']
@@ -35,9 +35,7 @@ export async function generateMetadata({
     const authorResults = allAuthors.find((p) => p.slug === author)
     return coreContent(authorResults as Authors)
   })
-  if (!post) {
-    return
-  }
+  if (!post) return
 
   const publishedAt = new Date(post.date).toISOString()
   const modifiedAt = new Date(post.lastmod || post.date).toISOString()
@@ -46,11 +44,6 @@ export async function generateMetadata({
   if (post.images) {
     imageList = typeof post.images === 'string' ? [post.images] : post.images
   }
-  const ogImages = imageList.map((img) => {
-    return {
-      url: img.includes('http') ? img : siteMetadata.siteUrl + img,
-    }
-  })
 
   return {
     title: post.title,
@@ -64,7 +57,7 @@ export async function generateMetadata({
       publishedTime: publishedAt,
       modifiedTime: modifiedAt,
       url: './',
-      images: ogImages,
+      images: `/og/${slug}`,
       authors: authors.length > 0 ? authors : [siteMetadata.author],
     },
     twitter: {

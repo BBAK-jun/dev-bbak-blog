@@ -2288,6 +2288,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fontsource/inter@npm:^5.1.0":
+  version: 5.1.0
+  resolution: "@fontsource/inter@npm:5.1.0"
+  checksum: 357454d870a1cdb2cbe9c01ae254a0223045e78eba5ca5824f01e139dbcf7254e327c33aaa0e054c37499956229c0555390fa32bfca17aae6e2f23ba4e092633
+  languageName: node
+  linkType: hard
+
+"@fontsource/roboto-mono@npm:^5.1.0":
+  version: 5.1.0
+  resolution: "@fontsource/roboto-mono@npm:5.1.0"
+  checksum: 40654fbc6d1426668e6be6ca5ddc36fd01474b2a38603bb0000926a716fc4dbac19d5acbc980b9f1b8c2044c3b1ff619e8f71e86b94420423db4913610dcb9b9
+  languageName: node
+  linkType: hard
+
 "@giscus/react@npm:^2.3.0":
   version: 2.4.0
   resolution: "@giscus/react@npm:2.4.0"
@@ -4830,6 +4844,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "dev-bbak-blog@workspace:."
   dependencies:
+    "@fontsource/inter": ^5.1.0
+    "@fontsource/roboto-mono": ^5.1.0
     "@next/bundle-analyzer": 13.4.12
     "@svgr/webpack": ^8.0.1
     "@tailwindcss/forms": ^0.5.4
