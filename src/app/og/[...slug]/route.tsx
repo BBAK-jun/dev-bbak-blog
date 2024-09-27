@@ -1,11 +1,11 @@
 export const runtime = 'edge'
 
-import { getPostDetail } from 'actions/get-post-detail'
 import { ImageResponse } from 'next/og'
 
-export async function GET(_req: Request, { params }: { params: { slug: string[] } }) {
-  const slug = decodeURI(params.slug.join('/'))
-  const { post } = await getPostDetail(slug)
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const title = searchParams.get('title')
+  const date = searchParams.get('date')
 
   return new ImageResponse(
     (
@@ -18,10 +18,10 @@ export async function GET(_req: Request, { params }: { params: { slug: string[] 
 
         <main tw="flex grow pb-3 flex-col items-center justify-center">
           <div tw="flex">
-            <div tw="bg-gray-100 p-8 text-7xl font-medium rounded-md text-center">{post.title}</div>
+            <div tw="bg-gray-100 p-8 text-7xl font-medium rounded-md text-center">{title}</div>
           </div>
 
-          <div tw="mt-5 flex text-3xl text-gray-500">{post.date}</div>
+          <div tw="mt-5 flex text-3xl text-gray-500">{date}</div>
         </main>
       </div>
     ),

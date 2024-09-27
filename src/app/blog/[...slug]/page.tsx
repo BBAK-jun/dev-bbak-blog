@@ -57,7 +57,7 @@ export async function generateMetadata({
       publishedTime: publishedAt,
       modifiedTime: modifiedAt,
       url: './',
-      images: `/og/${slug}`,
+      images: `/og/${slug}?title=${post.title}&date=${publishedAt}`,
       authors: authors.length > 0 ? authors : [siteMetadata.author],
     },
     twitter: {
