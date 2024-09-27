@@ -3,13 +3,6 @@ export const runtime = 'edge'
 import { getPostDetail } from 'actions/get-post-detail'
 import { ImageResponse } from 'next/og'
 
-const robotoMono400 = fetch(
-  new URL(
-    `../../../../node_modules/@fontsource/roboto-mono/files/roboto-mono-latin-400-normal.woff`,
-    import.meta.url
-  )
-).then((res) => res.arrayBuffer())
-
 export async function GET(_req: Request, { params }: { params: { slug: string[] } }) {
   const slug = decodeURI(params.slug.join('/'))
   const { post } = await getPostDetail(slug)
@@ -44,12 +37,6 @@ export async function GET(_req: Request, { params }: { params: { slug: string[] 
     {
       width: 1200,
       height: 630,
-      fonts: [
-        {
-          name: 'Roboto Mono 400',
-          data: await robotoMono400,
-        },
-      ],
     }
   )
 }
