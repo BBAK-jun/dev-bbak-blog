@@ -3,7 +3,7 @@ export const runtime = 'edge'
 import { ImageResponse } from 'next/og'
 import BlogOGImage from 'components/OpenGraphImage'
 
-export async function GET(request: Request, { params }: { params: { slug: string[] } }) {
+export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const title = searchParams.get('title')
   const date = searchParams.get('date')
