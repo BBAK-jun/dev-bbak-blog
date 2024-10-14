@@ -11,23 +11,29 @@ import Tag from './Tag'
 
 type PostsProps = {
   initialPosts: Blog[]
+  tag?: string
 }
 
-export default function Posts({ initialPosts }: PostsProps) {
+export default function Posts({ initialPosts, tag }: PostsProps) {
   const [posts, setPosts] = useState(initialPosts)
-  const [page, setPage] = useState(1)
-  const [limit, setLimit] = useState(10)
-  const [hasMore, setHasMore] = useState(true)
+  const [pagination, setPagination] = useState({ page: 2, limit: 10, hasMore: true })
 
   const { ref, inView } = useInView()
 
   const loadMorePosts = useCallback(async () => {
-    const morePosts = await getPosts({ page, limit })
+    const {
+      data: loadedPosts,
+      currentPage,
+      hasMore,
+    } = await getPosts({ page: pagination.page, limit: pagination.limit, tag })
 
-    setPosts([...posts, ...morePosts.data])
-    setPage(morePosts.currentPage + 1)
-    setHasMore(morePosts.hasMore)
-  }, [page, posts])
+    setPosts([...posts, ...loadedPosts])
+    setPagination((prev) => ({
+      ...prev,
+      page: currentPage + 1,
+      hasMore,
+    }))
+  }, [pagination.page, posts])
 
   useEffect(() => {
     if (inView) {
@@ -81,7 +87,7 @@ export default function Posts({ initialPosts }: PostsProps) {
         </li>
       ))}
 
-      {hasMore && <div ref={ref}>Loading...</div>}
+      {pagination.hasMore && <div ref={ref}>Loading...</div>}
     </ul>
   )
 }

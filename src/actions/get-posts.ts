@@ -1,19 +1,39 @@
 'use server'
 
-import { allBlogs } from 'contentlayer/generated'
+import { allBlogs, Blog } from 'contentlayer/generated'
 
 type Options = {
   tag?: string
   page?: number
   limit?: number
+  infinite?: boolean
 }
 
-export const getPosts = async (options?: Options) => {
+type PostMetaData = {
+  totalCount: number
+  totalPages: number
+  currentPage: number
+  hasMore: boolean
+  data: Blog[]
+}
+
+export const getPosts = async (options?: Options): Promise<PostMetaData> => {
   const page = options?.page || 1
   const limit = options?.limit || 10
   const tag = options?.tag
+  const infinite = options?.infinite
 
   let sortedBlogs = allBlogs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
+  if (infinite) {
+    return {
+      totalCount: sortedBlogs.length,
+      totalPages: 1,
+      currentPage: 1,
+      hasMore: false,
+      data: sortedBlogs,
+    }
+  }
 
   if (tag) {
     sortedBlogs = sortedBlogs.filter((post) => {

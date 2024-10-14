@@ -1,0 +1,133 @@
+---
+title: 'useSyncExternalStore Deep dive'
+date: '2024-10-12T16:00:03.284Z'
+summary: '외부세계와의 어댑터'
+tags: ['REACT']
+---
+
+# useSyncExternalStore의 기본 개념
+
+`useSyncExternalStore`는 React 18에서 도입된 훅으로, 외부세계와 React 컴포넌트를 동기화 하는데 주로 사용됩니다.
+
+## 목적
+
+- 외부 상태 관리 시스템과 React 컴포넌트 간의 동기화합니다.
+- 동시성 기능과 호환되는 안전한 상태 관리 방식을 제공합니다.
+- 외부 세계의 변경사항을 React 컴포넌트 렌더링 사이클과 일관되게 동기화합니다.
+
+## 도입배경
+
+- React 18의 동시성 렌더링 도입 : 동시성 렌더링을 도입했는데, 이는 렌더링 작업을 중단하고 재시작할 수 있도록 합니다.
+  이로 인해 기존의 외부 상태 구독방식이 일관성 문제를 일으킬 수 있습니다.
+- Tearing 현상 방지 : Tearing은 UI의 서로 다른 부분이 동일한 데이터의 서로 다른 버전을 표시하는 현상입니다. useSyncExternalStore는 이러한 Tearing 현상을 방지하여 일관된 UI를 보장합니다.
+- 외부 상태 관리 라이브러리와의 호환성 : 외부 상태 관리 라이브러리들이 React의 새로운 동시성 모델과 호환되도록 하기 위해 도입되었습니다.
+
+# 기존의 외부상태 구독방식의 문제점
+
+기존의 외부 상태 구독방식은 주로 useEffect를 사용한 방식입니다.
+
+```tsx
+function StatusDisplay({ type }) {
+  const [status, setStatus] = useState(externalStore.getStatus())
+
+  useEffect(() => {
+    let isMounted = true
+    const handleChange = () => {
+      const result = externalStore.getStatus(type)
+
+      if (isMounted) setStatus(result)
+    }
+
+    externalStore.subscribe(handleChange)
+
+    return () => {
+      isMounted = false
+      externalStore.unsubscribe(handleChange)
+    }
+  }, [type])
+
+  return <div>Status: {status}</div>
+}
+```
+
+상기 컴포넌트는 특정 타입(type)의 상태를 외부 스토어(externalStore)로부터 가져와 표시하는 컴포넌트입니다. 이때 어떤 문제가있는지 알아보겠습니다.
+
+1. **동시성 렌더링 문제 (concurrent rendering)**
+
+동시성 모드에서 렌더링 도중 외부 상태가 변경되면, 렌더링 결과가 일관되지 않을 수 있습니다.
+예를들어 부모 컴포넌트에서 이 카운터를 여러번 렌더링 할 경우 각 인스턴스가 서로 다른 카운트 값을 표시할 수 있습니다.
+
+2. **불필요한 리렌더링**
+
+외부 스토어의 모든 변경잉 `setStatus`를 호출하므로 실제 상태 변경이 없더라도, 컴포넌트가 리렌더링 될 수 있다.
+
+3. **복잡한 구독 및 해제 로직**
+
+구독, 초기 데이터 로딩, 구독 해제, 그리고 비동기 작업의 안전한 처리를 위한 복잡한 로직이 필요합니다
+
+4. **레이스 컨디션(race condition)**
+
+만약 렌더링 도중 `type`이 빠르게 변경되는 경우, 이전 요청의 결과가 나중에 잘못 도착하여 잘못된 상태를 표시할 수 있습니다.
+
+5. **서버 사이드렌더링 어려움**
+
+useEffect는 클라이언 사이드에서만 실행되므로 서버사이드에서는 콘텐츠가 비어있는 문제가 있습니다.
+
+# Tearing 현상
+
+Tearing 현상은 말그대로 찢어짐 현상입니다. 해당 현상은 React의 동시성 렌더링환경에서 발생할 수 있는 문제입니다. 이는 UI의 일부분이 다른 부분과 일관되지 않은 상태를 보여주는 현상을 말하는것입니다.
+
+## Tearing이 발생하는 주요원인
+
+1. 동시성 렌더링은 렌더링 작업을 여러개의 청크로 나누어 처리합니다.
+2. React 렌더링 사이클과 독립적으로 변경되는 외부 상태의 비동기적 업데이트
+3. 렌더링 과정에서 외부 상태가 변경될때 입니다.
+
+```tsx
+function Component() {
+  return (
+    <React.Fragment>
+      <StatusDisplay type="network" />
+      <StatusDisplay type="network" />
+      <StatusDisplay type="network" />
+    </React.Fragment>
+  )
+}
+```
+
+# useSyncExternalStore 구조
+
+```ts
+const state = useSyncExternalStore(subscribe, getSnapshot[, getServerSnapshot])
+```
+
+## 주요 매개변수
+
+- subscribe: 외부 스토어의 변경을 감지하는 구독 함수
+- getSnapshot: 현재 스토어의 상태를 반환하는 함수
+- getServerSnapshot: (선택적) 서버 렌더링 시 초기 상태를 제공하는 함수
+
+## 내부 동작 원리
+
+1. 초기화
+
+   - 컴포넌트가 처음 렌더링 될때, useSyncExternalStore는 getSnapshot을 호출하여 초기 상태를 가져옵니다.
+   - subscribe을 사용하여 외부 스토어의 변경을 구독합니다.
+
+2. 상태 변경 감지
+
+   - 외부 스토어의 상태가 변경되면 subscribe 함수가 이를 감지하고 내부 매커니즘을 트리깅 합니다.
+
+3. 스냅샷 비교
+
+   - 상태 변경이 감지되면 새로운 getSnapshot 결과와 이전 스냅샷을 비교합니다.
+   - `Object.is`를 사용하여 동일성(동등성X)을 비교합니다.
+
+4. 리렌더링 결정
+
+   - 새로운 스냅샷이 이전과 다르다면 리렌더링을 예약합니다.
+   - 같다면 리렌더링을 하지않습니다.
+
+5. 동시성 처리
+   - 동시성 모드에서, 렌더링 중 외부 상태가 변경되면 즉시 새로운 렌더링을 시작합니다.
+   - 이를 통해 Tearing 현상을 방지하고 일관된 UI를 보장합니다.
