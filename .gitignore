@@ -1,49 +1,46 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
-/.pnp
-.pnp.js
-/.yarn/*
-!/.yarn/releases
-!/.yarn/plugins
-!/.yarn/sdks
+**/node_modules
+# pnpm
+.pnpm-store
+**/pnpm-lock.yaml
+**/.pnpm-debug.log
 
 # testing
-/coverage
+**/coverage
 
 # next.js
-/.next/
-/out/
-public/sitemap.xml
-.vercel
+**/.next/
+**/out/
+**/public/sitemap.xml
+**/.vercel
 
 # production
-/build
-*.xml
+**/build
+**/*.xml
 
 # rss feed
-/public/feed.xml
+**/public/feed.xml
 
 # search
-/public/search.json
+**/public/search.json
 
 # misc
-.DS_Store
+**/.DS_Store
 
 # debug
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+**/*.log
+**/npm-debug.log*
 
 # local env files
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
 
 # Contentlayer
-.contentlayer
+**/.contentlayer
 
-.env
+# env files
+**/.env

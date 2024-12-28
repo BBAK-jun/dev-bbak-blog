@@ -1,0 +1,46 @@
+{
+  "extends": "@dev-bbak/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "jsx": "preserve",
+    "baseUrl": ".",
+    "paths": {
+      "components/*": ["src/components/*"],
+      "layouts/*": ["src/layouts/*"],
+      "css/*": ["src/css/*"],
+      "data/*": ["data/*"],
+      "actions/*": ["src/actions/*"],
+      "contentlayer/generated": [".contentlayer/generated"]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "strictNullChecks": true
+  },
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.json",
+    ".contentlayer/generated",
+    ".contentlayer/generated/**/*.json",
+    ".next/types/**/*.ts",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "@dev-bbak/prettier-config",
+  "private": true,
+  "main": "base.cjs",
+  "files": [
+    "base.cjs"
+  ],
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "prettier-plugin-packagejson": "^2.5.3"
+  }
+}
