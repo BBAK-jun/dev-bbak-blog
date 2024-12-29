@@ -10,12 +10,14 @@
     "jsx": "preserve",
     "baseUrl": ".",
     "paths": {
-      "components/*": ["src/components/*"],
-      "layouts/*": ["src/layouts/*"],
-      "css/*": ["src/css/*"],
-      "data/*": ["data/*"],
-      "actions/*": ["src/actions/*"],
-      "contentlayer/generated": [".contentlayer/generated"]
+      "tag-data": ["./app/tag-data.json"],
+      "contentlayer/generated": [".contentlayer/generated"],
+      "app/*": ["src/app/*"],
+      "entities/*": ["src/entities/*"],
+      "features/*": ["src/features/*"],
+      "pages/*": ["src/pages/*"],
+      "shared/*": ["src/shared/*"],
+      "widgets/*": ["src/widgets/*"]
     },
     "plugins": [
       {

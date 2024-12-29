@@ -134,5 +134,5 @@ function createTagCount(allDocuments: DocumentTypes[]) {
     }
   }
 
-  writeFileSync('./src/app/tag-data.json', JSON.stringify(tags))
+  writeFileSync('./app/tag-data.json', JSON.stringify(tags))
 }

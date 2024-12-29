@@ -4,8 +4,8 @@ import path from 'path'
 import { escape } from 'pliny/utils/htmlEscaper'
 
 import { allBlogs } from '../.contentlayer/generated'
+import tagData from '../app/tag-data.json' with { type: 'json' }
 import siteMetadata from '../data/siteMetadata'
-import tagData from '../src/app/tag-data.json' with { type: 'json' }
 
 const generateRssItem = (config, post) => `
   <item>

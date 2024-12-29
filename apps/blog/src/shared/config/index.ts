@@ -1,0 +1,1 @@
+export { genPageMetadata } from './seo'
