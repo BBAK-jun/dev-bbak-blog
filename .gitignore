@@ -44,3 +44,5 @@
 
 # env files
 **/.env
+
+**/.turbo
