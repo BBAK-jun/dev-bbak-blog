@@ -1,5 +1,5 @@
-import { withContentlayer } from 'next-contentlayer'
 import analyzer from '@next/bundle-analyzer'
+import { withContentlayer } from 'next-contentlayer'
 
 const withBundleAnalyzer = analyzer({
   enabled: process.env.ANALYZE === 'true',
@@ -70,6 +70,8 @@ const nextConfig = () => {
     images: {
       domains: ['picsum.photos'],
     },
+
+    transpilePackages: ['katex', 'prismjs'],
     async headers() {
       return [
         {
@@ -78,7 +80,7 @@ const nextConfig = () => {
         },
       ]
     },
-    webpack: (config, options) => {
+    webpack: (config) => {
       config.module.rules.push({
         test: /\.svg$/,
         use: ['@svgr/webpack'],

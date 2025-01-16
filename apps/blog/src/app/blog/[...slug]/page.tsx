@@ -1,18 +1,17 @@
 import 'css/prism.css'
 import 'katex/dist/katex.css'
 
+import { getPostDetail } from 'actions/get-post-detail'
 import { components } from 'components/MDXComponents'
 import PageTitle from 'components/PageTitle'
 import { allAuthors, allBlogs, type Authors } from 'contentlayer/generated'
-import { MDXLayoutRenderer } from 'pliny/mdx-components'
-import { coreContent } from 'pliny/utils/contentlayer'
-
-import { getPostDetail } from 'actions/get-post-detail'
+import siteMetadata from 'data/siteMetadata'
 import PostBanner from 'layouts/PostBanner'
 import PostLayout from 'layouts/PostLayout'
 import PostSimple from 'layouts/PostSimple'
 import { Metadata } from 'next'
-import siteMetadata from 'data/siteMetadata'
+import { MDXLayoutRenderer } from 'pliny/mdx-components'
+import { coreContent } from 'pliny/utils/contentlayer'
 
 const isProduction = process.env.NODE_ENV === 'production'
 const defaultLayout = 'PostLayout'
