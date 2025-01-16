@@ -1,5 +1,4 @@
 import 'css/prism.css'
-import 'katex/dist/katex.css'
 
 import { getPostDetail } from 'actions/get-post-detail'
 import { components } from 'components/MDXComponents'

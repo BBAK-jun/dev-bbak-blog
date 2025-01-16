@@ -1,5 +1,4 @@
 import 'react-notion/src/styles.css'
-import 'prismjs/themes/prism-tomorrow.css'
 
 import { BlockMapType, NotionRenderer } from 'react-notion'
 import { genPageMetadata } from 'src/app/seo'
