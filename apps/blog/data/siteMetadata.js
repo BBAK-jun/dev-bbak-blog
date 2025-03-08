@@ -3,7 +3,7 @@ const siteMetadata = {
   title: 'dev-bbak',
   author: 'JunHyeong Park',
   headerTitle: 'dev-bbak',
-  description: 'Frontend Engineer - 박준형',
+  description: 'DEV-BBAK 블로그',
   language: 'ko-kr',
   theme: 'light', // system, dark or light
   siteUrl: 'https://www.dev-bbak.site/',
