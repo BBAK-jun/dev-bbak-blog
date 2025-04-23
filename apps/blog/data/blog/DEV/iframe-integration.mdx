@@ -164,14 +164,11 @@ Vue 애플리케이션에서는 `ExternalDialog` 컴포넌트를 만들어 ifram
 
 ```html
 <template>
-  <div v-show="isVisible" class="dimmed" @click="clickDimmed">
+  <div v-show="isVisible" class="dimmed">
     <iframe
-      v-show="isVisible"
       ref="dialogIframe"
-      :src="url"
+      :src="dialogUrl"
       class="iframe"
-      frameborder="0"
-      allowtransparency="true"
     />
   </div>
 </template>
@@ -179,42 +176,8 @@ Vue 애플리케이션에서는 `ExternalDialog` 컴포넌트를 만들어 ifram
 <script>
 export default {
   props: {
-    url: {
-      type: String,
-      default: ''
-    },
-    isVisible: {
-      type: Boolean,
-      default: false
-    }
-  },
-  data() {
-    return {
-      dialogHeight: 0,
-      dialogType: 'ALERT',
-      메시지타입: {
-        // 자식컨테이너와 통신을 위한 메시지 타입
-      }
-    }
-  },
-  watch: {
-    isVisible(value) {
-      if(value) {
-        // iframe에 메시지 전송
-        this.$refs.dialogIframe.contentWindow.postMessage(
-          { type: this.메시지타입.부모_자식_다이얼로그_열기 },
-          '*'
-        )
-        this.preventDocumentScroll()
-      } else {
-        this.$refs.dialogIframe.contentWindow.postMessage(
-          { type: this.메시지타입.부모_자식_다이얼로그_닫기 },
-          '*'
-        )
-        this.dialogHeight = 0
-        this.restoreDocumentScroll()
-      }
-    }
+    dialogUrl: String,
+    isVisible: Boolean
   },
   mounted() {
     window.addEventListener('message', this.handleChildMessage)
@@ -223,43 +186,32 @@ export default {
     window.removeEventListener('message', this.handleChildMessage)
   },
   methods: {
-    // 핵심 메서드: React에서 오는 메시지 처리
+    sendMessageToIframe(messageType, payload = {}) {
+      this.$refs.dialogIframe.contentWindow.postMessage(
+        { type: messageType, payload },
+        '*'
+      )
+    },
     handleChildMessage(event) {
       const { type, payload } = event.data
 
       switch (type) {
-        case this.메시지타입.자식_부모_다이얼로그_열림:
-          this.$emit('dialogOpen')
-          break
-
-        case this.메시지타입.자식_부모_다이얼로그_닫힘:
+        case '자식_부모_다이얼로그_닫힘':
           this.$emit('dialogClose')
           break
-
-        case this.메시지타입.자식_부모_다이얼로그_높이_설정:
-          this.dialogHeight = payload.height
+        case '자식_부모_다이얼로그_높이_설정':
           this.$refs.dialogIframe.style.height = `${payload.height}px`
           break
-
-        case this.메시지타입.자식_부모_페이지_이동:
-          // 페이지 이동 처리 로직
-          location.href = this.buildRedirectUrl(payload)
-          break
       }
-    },
-
-    clickDimmed() {
-      // ALERT 타입은 배경 클릭으로 닫히지 않음
-      if(this.dialogType === 'ALERT') return
-      this.$emit('dialogClose')
-    },
-
-    preventDocumentScroll() {
-      // 스크롤 방지 로직
-    },
-
-    restoreDocumentScroll() {
-      // 스크롤 복원 로직
+    }
+  },
+  watch: {
+    isVisible(value) {
+      if (value) {
+        this.sendMessageToIframe('부모_자식_다이얼로그_열기')
+      } else {
+        this.sendMessageToIframe('부모_자식_다이얼로그_닫기')
+      }
     }
   }
 }
@@ -271,102 +223,97 @@ export default {
 React 애플리케이션에서는 `useExternalDialog` 훅을 만들어 부모 컨테이너와의 통신을 관리합니다.
 
 ```typescript
-type ExternalDialogProps = {
-  dialogHeight?: number
-  dialogType?: 'ALERT' | 'CONFIRM'
-}
-
-export const useExternalDialog = ({
-  dialogHeight = 380,
-  dialogType = 'ALERT'
-}: ExternalDialogProps) => {
+// 핵심 구현 컨셉만 표시한 의사 코드입니다
+export const useExternalDialog = (options = {}) => {
+  const { dialogHeight = 380 } = options;
 
   // 다이얼로그 열기
   const handleOpen = useCallback(() => {
     window.parent.postMessage({
-      type: 메시지타입.자식_부모_다이얼로그_열림
+      type: '자식_부모_다이얼로그_열림'
     }, '*')
   }, [])
 
   // 다이얼로그 닫기
   const handleClose = useCallback(() => {
     window.parent.postMessage({
-      type: 메시지타입.자식_부모_다이얼로그_닫힘
+      type: '자식_부모_다이얼로그_닫힘'
     }, '*')
   }, [])
 
-  // 높이 설정
-  const handleUpdateHeight = useCallback(() => {
+  // 부모 창에 높이 전달
+  const updateHeight = useCallback(() => {
     window.parent.postMessage({
-      type: 메시지타입.자식_부모_다이얼로그_높이_설정,
+      type: '자식_부모_다이얼로그_높이_설정',
       payload: { height: dialogHeight }
     }, '*')
   }, [dialogHeight])
 
   // 부모 메시지 리스너 설정
   useEffect(() => {
-    const handleParentMessage = (event: MessageEvent) => {
-      const type = event.data.type
+    const handleParentMessage = (event) => {
+      const { type } = event.data;
 
-      switch (type) {
-        case 메시지타입.부모_자식_다이얼로그_열기:
-          handleOpen()
-          break
-        case 메시지타입.부모_자식_다이얼로그_닫기:
-          handleClose()
-          break
-        // 기타 메시지 타입 처리
+      if (type === '부모_자식_다이얼로그_열기') {
+        handleOpen();
+      } else if (type === '부모_자식_다이얼로그_닫기') {
+        handleClose();
       }
-    }
+    };
 
-    window.addEventListener('message', handleParentMessage)
-    handleUpdateHeight() // 초기 높이 설정
+    window.addEventListener('message', handleParentMessage);
+    updateHeight(); // 초기 높이 설정
 
-    return () => {
-      window.removeEventListener('message', handleParentMessage)
-    }
-  }, [handleOpen, handleClose, handleUpdateHeight])
+    return () => window.removeEventListener('message', handleParentMessage);
+  }, [handleOpen, handleClose, updateHeight]);
 
-  // ...그 외의 메시징 처리
-
-  return [handleOpen, handleClose] as const
+  return [handleOpen, handleClose];
 }
 ```
 
 ### 사용 예시: React Dialog 컴포넌트
 
-React Dialog 컴포넌트에서 useExternalDialog 훅을 활용하는 간단한 예:
+React Dialog 컴포넌트에서 useExternalDialog 훅을 활용한 간단한 예:
 
-```tsx
-import { useExternalDialog } from './hooks/useExternalDialog'
-
-export const ExternalDialogPage = () => {
+```jsx
+// 핵심 구현 컨셉만 표시한 의사 코드입니다
+function Dialog() {
+  const [isOpen, setIsOpen] = useState(false);
   const [handleOpen, handleClose] = useExternalDialog({
-    initialOpen: true,
-    dialogHeight: 400,
-    dialogType: 'CONFIRM'
-  })
+    dialogHeight: 400
+  });
 
-  const handleConfirm = async () => {
-    await Dialog에서_처리해야하는_요청()
-    handleClose()
-  }
+  // 다이얼로그 열릴 때 상태 업데이트
+  useEffect(() => {
+    const onOpen = () => setIsOpen(true);
+    const onClose = () => setIsOpen(false);
+
+    // 이벤트 리스너 등록
+    window.addEventListener('dialog:open', onOpen);
+    window.addEventListener('dialog:close', onClose);
+
+    return () => {
+      window.removeEventListener('dialog:open', onOpen);
+      window.removeEventListener('dialog:close', onClose);
+    };
+  }, []);
 
   return (
-    <div className={isOpen ? 'visible' : 'hidden'}>
-      <div className="dialog-header">
-        <h2>환영합니다!</h2>
-        <button onClick={handleClose}>닫기</button>
-      </div>
-      <div className="dialog-body">
-        <p>React로 작성된 Dialog 컴포넌트입니다.</p>
-      </div>
-      <div className="dialog-footer">
-        <button onClick={handleClose}>취소</button>
-        <button onClick={handleClose}>확인</button>
+    <div className={isOpen ? 'dialog open' : 'dialog'}>
+      <div className="dialog-content">
+        <div className="dialog-header">
+          <h2>Dialog 제목</h2>
+          <button onClick={handleClose}>닫기</button>
+        </div>
+        <div className="dialog-body">
+          <p>Dialog 내용...</p>
+        </div>
+        <div className="dialog-footer">
+          <button onClick={handleClose}>확인</button>
+        </div>
       </div>
     </div>
-  )
+  );
 }
 ```
 
@@ -378,7 +325,7 @@ iframe 통합 방식은 구현이, 단순하지만 보안 측면에서 몇 가�
 
 1. **XSS(Cross-Site Scripting) 공격 방지**
    - iframe의 `sandbox` 속성을 사용하여 필요한 권한만 부여해야 합니다.
-   - 예: `<iframe sandbox="allow-scripts allow-same-origin"></iframe>`
+   - 예: `<iframe sandbox="allow-scripts allow-same-origin allow-forms"></iframe>`
 
 2. **출처 검증**
    - `postMessage` 메시지 수신 시 발신자의 origin을 항상 검증해야 합니다.
