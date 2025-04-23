@@ -278,28 +278,12 @@ React Dialog 컴포넌트에서 useExternalDialog 훅을 활용한 간단한 예
 ```jsx
 // 핵심 구현 컨셉만 표시한 의사 코드입니다
 function Dialog() {
-  const [isOpen, setIsOpen] = useState(false);
   const [handleOpen, handleClose] = useExternalDialog({
     dialogHeight: 400
   });
 
-  // 다이얼로그 열릴 때 상태 업데이트
-  useEffect(() => {
-    const onOpen = () => setIsOpen(true);
-    const onClose = () => setIsOpen(false);
-
-    // 이벤트 리스너 등록
-    window.addEventListener('dialog:open', onOpen);
-    window.addEventListener('dialog:close', onClose);
-
-    return () => {
-      window.removeEventListener('dialog:open', onOpen);
-      window.removeEventListener('dialog:close', onClose);
-    };
-  }, []);
-
   return (
-    <div className={isOpen ? 'dialog open' : 'dialog'}>
+    <div>
       <div className="dialog-content">
         <div className="dialog-header">
           <h2>Dialog 제목</h2>
