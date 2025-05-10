@@ -15,9 +15,11 @@ draft: false
 
 ```
 // 초기 요구사항
-https://our-service.com/my-page/coupons
-→ 발급받은 쿠폰목록 페이지로 이동
+https://our-service.com/promo/summer-campaign
+→ 여름 캠페인 페이지로 이동
 ```
+
+개발자라면 누구나 "링크 하나 만들면 끝"이라고 생각했을 겁니다.
 
 ## 첫 번째 도전: 인증이 필요한 페이지
 
@@ -64,6 +66,22 @@ https://our-service.com/lesson?level=5&duration=25&lang=EN&section=intermediate
 - URL 길이 제한으로 인해 담을 수 있는 정보가 제한적
 - 복잡한 JSON 구조를 URL-safe하게 인코딩하면 길이가 더 길어짐
 - 일부 OAuth 제공자는 state 길이를 제한하기도 함
+
+### OAuth2 state 파라미터의 원래 역할
+
+OAuth2 RFC 6749에서 state 파라미터는 두 가지 주요 목적으로 설계되었습니다:
+
+1. **CSRF(Cross-Site Request Forgery) 공격 방지**: 인증 요청과 콜백 사이의 상태를 유지하여 요청의 무결성 확인
+2. **애플리케이션 상태 유지**: 인증 전후의 애플리케이션 상태 정보 전달
+
+RFC에서는 다음과 같이 명시하고 있습니다:
+```
+The authorization server SHOULD require the client to provide the
+complete redirection URI (the client MAY use the "state" request
+parameter to achieve per-request customization).
+```
+
+즉, OAuth2 표준은 동적인 리다이렉션 요구사항을 state 파라미터로 처리하도록 권장합니다. 하지만 실제로는 state 파라미터의 크기 제한으로 인해 복잡한 데이터를 전달하기 어렵습니다.
 
 ## 해결 방안: Redis를 활용한 임시 저장소
 
@@ -180,7 +198,9 @@ TypeScript를 활용해 목적지별 파라미터를 타입으로 정의함으�
 이제 이 리다이렉트 게이트웨이는 다양한 곳에서 활용되고 있습니다:
 
 - 카카오톡 알림톡 마케팅 링크
-- SNS 마케팅 링크
+- 이메일 캠페인 링크
+- SMS 문자 링크
+- QR 코드 기반 오프라인 마케팅
 - 외부 제휴사 연동 링크
 
 ## 결론
