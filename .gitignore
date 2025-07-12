@@ -45,4 +45,4 @@
 # env files
 **/.env
 
-**/.turbo
+.turbo/**/**
