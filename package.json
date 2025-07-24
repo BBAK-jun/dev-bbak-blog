@@ -34,8 +34,21 @@
       "prettier --write"
     ]
   },
-  "packageManager": "pnpm@9.1.0",
+  "packageManager": "pnpm@8.15.6",
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=20.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "sort-package-json": "2.8.0",
+      "prettier-plugin-packagejson": "2.4.12",
+      "@opentelemetry/api": "1.4.1",
+      "@opentelemetry/core": "1.13.0",
+      "@opentelemetry/exporter-trace-otlp-grpc": "0.39.1",
+      "@opentelemetry/resources": "1.13.0",
+      "@opentelemetry/sdk-trace-base": "1.13.0",
+      "@opentelemetry/sdk-trace-node": "1.13.0",
+      "@opentelemetry/semantic-conventions": "1.13.0"
+    }
   }
 }
