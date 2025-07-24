@@ -4,6 +4,7 @@
 **/node_modules
 # pnpm
 .pnpm-store
+**/pnpm-lock.yaml
 **/.pnpm-debug.log
 
 # testing
