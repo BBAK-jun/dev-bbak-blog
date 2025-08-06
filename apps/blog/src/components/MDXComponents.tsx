@@ -1,17 +1,20 @@
-import TOCInline from 'pliny/ui/TOCInline'
-import Pre from 'pliny/ui/Pre'
-import BlogNewsletterForm from 'pliny/ui/BlogNewsletterForm'
 import type { MDXComponents } from 'mdx/types'
+import BlogNewsletterForm from 'pliny/ui/BlogNewsletterForm'
+import Pre from 'pliny/ui/Pre'
+import TOCInline from 'pliny/ui/TOCInline'
+
 import Image from './Image'
 import CustomLink from './Link'
+import MermaidChart from './MermaidChart'
 import YouTube from './Youtube'
 
 export const components: MDXComponents = {
   Image,
   TOCInline,
-  // @ts-ignore
+  Mermaid: MermaidChart,
+  // @ts-expect-error
   a: CustomLink,
-  // @ts-ignore
+  // @ts-expect-error
   pre: Pre,
   BlogNewsletterForm,
   YouTube,
