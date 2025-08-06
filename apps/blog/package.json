@@ -24,8 +24,6 @@
     "github-slugger": "^2.0.0",
     "gray-matter": "^4.0.2",
     "image-size": "1.0.0",
-    "mermaid": "^11.8.1",
-    "mermaid-monorepo": "github:mermaid-js/mermaid",
     "next": "14.2.3",
     "next-contentlayer": "0.3.4",
     "next-themes": "^0.2.1",
