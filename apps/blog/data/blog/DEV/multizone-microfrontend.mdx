@@ -45,44 +45,7 @@ draft: false
 
 ## 문제의 핵심: 쿠키
 
-<Mermaid chart={`
-graph TD
-    %% 외부 진입
-    subgraph 외부채널["외부 채널"]
-        Marketing["podospeaking.com<br/>(마케팅 사이트)"]
-        MobileApp["모바일 앱<br/>(WebView)"]
-        DeepLink["딥링크 또는 외부 링크"]
-    end
-
-    %% 진입점
-    Marketing -->|로그인 클릭| Gateway["podo.re-speak.com<br/>(Next.js Gateway)"]
-    MobileApp -->|로그인| Gateway
-    DeepLink -->|accessToken 포함된 진입| Gateway
-
-    %% 게이트웨이 처리 로직
-    Gateway -->|accessToken 없음 또는 만료| Login["podo.re-speak.com/login"]
-    Gateway -->|accessToken 유효| Redirect["Redirect → destination"]
-
-    %% 리디렉션 대상 (하드 네비게이션)
-    subgraph TargetApps["목적지 앱들"]
-        NuxtZone["Zone A: Nuxt.js<br/>브라우저 쿠키 기반 인증"]
-        PHPZone["Zone B: PHP<br/>PHP 세션 기반 인증"]
-        NextZone["Zone C: Next.js<br/>HTTP Only 쿠키 기반 인증"]
-    end
-
-    Redirect -->|하드 네비게이션| NuxtZone
-    Redirect -->|하드 네비게이션| PHPZone
-    Redirect -->|하드 네비게이션| NextZone
-
-    %% 스타일링
-    classDef gatewayStyle fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
-    classDef zoneStyle fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-    classDef externalStyle fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
-
-    class Gateway gatewayStyle
-    class NuxtZone,PHPZone,NextZone zoneStyle
-    class Marketing,MobileApp,DeepLink externalStyle
-`} />
+![](/static/images/DEV/multizone-microfrontend/before.png)
 
 ### 브라우저가 쿠키 공유를 막는다
 
@@ -111,35 +74,7 @@ php:     https://admin-server.com       🍪
 
 실제로 사용자가 로그인하면 이런 복잡한 과정을 거쳐야 했다:
 
-<Mermaid chart={`
-sequenceDiagram
-    participant User as 사용자 브라우저
-    participant NextJS as podo.re-speak.com (Next.js)
-    participant Kakao as Kakao OAuth
-    participant API as API 서버
-    participant NuxtJS as app.podo-speaking.com (Nuxt.js)
-
-    User->>NextJS: 1. 사용자가 로그인 페이지 접속 (/login)
-    NextJS->>Kakao: 2. 카카오 로그인 버튼 클릭
-    Kakao-->>NextJS: 3. 인증 코드 전달 (Redirect)
-    NextJS->>API: 4. 인증 코드 전달 (/api/v1/oauth/kakao)
-    API-->>NextJS: 5. access_token, refresh_token, uid 등 전달
-
-    Note over NextJS: 6. podo.re-speak.com 도메인에<br/>쿠키 저장 (access_token 등)
-    Note over NextJS: 7. destination=HOME으로 리다이렉트
-
-    NextJS-->>User: 8. https://podo.re-speak.com?destination=HOME
-    NextJS->>User: 9. 쿠키 세팅된 상태로 전달 (?destination=HOME)
-
-    Note over User: 10. access_token, refresh_token, uid를<br/>쿼리파라미터로 전달
-
-    User->>NuxtJS: 11. app.podo-speaking.com으로 리다이렉트
-    User->>NuxtJS: 12. access_token 등을 전달<br/>(/app/user/podo/home?access_token=xxx&refresh_token=yyy&uid=zzz)
-    NuxtJS-->>User: 13. 홈 화면 렌더링 (URL에서 토큰 추출 후 저장)
-
-    %% 스타일링
-    Note over User, NuxtJS: 복잡한 11단계 인증 플로우
-`} />
+![](/static/images/DEV/multizone-microfrontend/login-flow.png)
 
 총 11단계나 되는 복잡한 과정이었다.
 
@@ -279,26 +214,7 @@ const multiZoneConfig = {
 
 ### 쿠키 문제 해결
 
-<Mermaid chart={`
-sequenceDiagram
-  participant Browser
-  participant NextJS as Next.js
-  participant Nuxt as Nuxt.js
-  participant PHP as PHP
-
-  Browser->>NextJS: GET /api/login
-  NextJS->>Browser: Set-Cookie (SameSite=None/ Secure/ HttpOnly)
-
-  Browser->>NextJS: GET /legacy/mypage
-  NextJS->>Nuxt: Proxy + Cookie 전달
-  Nuxt->>NextJS: 응답
-  NextJS->>Browser: 렌더링 결과
-
-  Browser->>NextJS: GET /support/inquiry
-  NextJS->>PHP: Proxy + Cookie 전달
-  PHP->>NextJS: 응답
-  NextJS->>Browser: 렌더링 결과
-`} />
+![](/static/images/DEV/multizone-microfrontend/login-flow.png)
 
 ```javascript
 // Next.js에서 쿠키 설정
@@ -311,62 +227,7 @@ Set-Cookie: access_token=xxx; SameSite=None; Secure; HttpOnly
 
 ### 완성된 아키텍처
 
-<Mermaid chart={`
-graph TB
-    %% 사용자
-    User[사용자]
-
-    %% 브라우저와 도메인 엔트리
-    subgraph Domain["단일 도메인: podo.re-speak.com"]
-        %% Next.js App Shell (게이트웨이이면서 동시에 Zone)
-        subgraph AppShell["Next.js App Shell"]
-            Gateway[게이트웨이<br/>Rewrite 처리]
-            NextZone[Next.js Zone<br/>신규 피처 담당]
-        end
-
-        %% Rewrite & Proxy 처리
-        Gateway -.->|rewrite & proxy| NuxtZone
-        Gateway -.->|rewrite & proxy| PHPZone
-        Gateway -.->|내부 라우팅| NextZone
-    end
-
-    %% 각 존 (실제 서버들)
-    subgraph Zones["독립적인 존들"]
-        NuxtZone[Nuxt.js Zone<br/>app.podo-speaking.com<br/>레거시 기능<br/>원서버 프록시]
-        PHPZone[PHP Zone<br/>운영 관리 페이지<br/>운영 도구<br/>원서버 프록시]
-    end
-
-    %% API 서버
-    APIServer[(API 서버)]
-
-    %% 데이터베이스
-    Database[(Database)]
-
-    %% 사용자 플로우
-    User --> Domain
-
-    %% 존에서 API 및 데이터베이스 접근
-    NuxtZone --> APIServer
-    PHPZone --> APIServer
-    NextZone --> APIServer
-
-    APIServer --> Database
-
-    %% 스타일링
-    classDef userStyle fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
-    classDef domainStyle fill:#e3f2fd,stroke:#1976d2,stroke-width:3px
-    classDef gatewayStyle fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
-    classDef nextZoneStyle fill:#e8f5e8,stroke:#0277bd,stroke-width:2px
-    classDef zoneStyle fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-    classDef serverStyle fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-
-    class User userStyle
-    class Domain domainStyle
-    class Gateway gatewayStyle
-    class NextZone nextZoneStyle
-    class NuxtZone,PHPZone zoneStyle
-    class APIServer,Database serverStyle
-`} />
+![](/static/images/DEV/multizone-microfrontend/after.png)
 
 **무엇이 좋아졌나**
 1. **하나의 문으로 들어감**: Next.js App shell을 통해 모든 게 연결됨
