@@ -1,16 +1,16 @@
-import { ReactNode } from 'react'
-import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Blog, Authors } from 'contentlayer/generated'
 import Comments from 'components/Comments'
+import Image from 'components/Image'
 import Link from 'components/Link'
 import PageTitle from 'components/PageTitle'
-import SectionContainer from 'components/SectionContainer'
-import Image from 'components/Image'
-import Tag from 'components/Tag'
-import siteMetadata from 'data/siteMetadata'
 import ScrollTopAndComment from 'components/ScrollTopAndComment'
+import SectionContainer from 'components/SectionContainer'
+import Tag from 'components/Tag'
+import type { Authors, Blog } from 'contentlayer/generated'
+import siteMetadata from 'data/siteMetadata'
+import { CoreContent } from 'pliny/utils/contentlayer'
+import { ReactNode } from 'react'
 
-const editUrl = (path: string) => `${siteMetadata.siteRepo}/blob/main/data/${path}`
+const editUrl = (path: string) => `${siteMetadata.siteRepo}/blob/main/apps/blog/data/${path}`
 const discussUrl = (path: string) =>
   `https://mobile.twitter.com/search?q=${encodeURIComponent(`${siteMetadata.siteUrl}/${path}`)}`
 
