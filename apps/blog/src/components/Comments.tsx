@@ -1,8 +1,10 @@
 'use client'
 
-import { Comments as CommentsComponent } from 'pliny/comments'
 import siteMetadata from 'data/siteMetadata'
+import { Comments as CommentsComponent } from 'pliny/comments'
 
-export default function Comments({ slug }: { slug: string }) {
-  return siteMetadata.comments && <CommentsComponent commentsConfig={siteMetadata.comments} slug={slug} />
+const Comments = ({ slug }: { slug: string }) => {
+  return siteMetadata.comments && <CommentsComponent commentsConfig={siteMetadata.comments} slug={`blog/${slug}`} />
 }
+
+export default Comments
