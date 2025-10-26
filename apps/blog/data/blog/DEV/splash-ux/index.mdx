@@ -91,191 +91,153 @@ summary: 직렬을 병렬 처리로 그리고 필요한 타이밍에 스플래�
 
 앱 실행 직후 즉시 스플래시를 표시하기 위해 네이티브 레벨에서 스플래시 화면을 구성했습니다.
 
-### app.config.ts 설정
+### 네이티브 스플래시 설정 예시
 
 ```typescript
-export default {
+// 설정 파일에서 스플래시 옵션 지정
+{
   splash: {
-    image: './assets/splash.png',
+    image: '스플래시_이미지_경로',
     resizeMode: 'contain',
     backgroundColor: '#ffffff'
   }
 }
 ```
 
-이렇게 하면 앱이 시작되는 순간부터 네이티브 스플래시가 표시되어 초기 흰 화면을 방지할 수 있습니다.
+앱 시작 시 즉시 네이티브 스플래시가 표시되도록 설정합니다.
 
 ## 2. 네이티브 레이어: 스플래시 제어 로직
 
-### _layout.tsx: 이중 조건 체크로 스플래시 해제
+### 네이티브 레이어 스플래시 제어 로직
 
 ```typescript
-// apps/native/src/app/_layout.tsx
-import { useBridge } from '@webview-bridge/react-native'
-import { appBridge } from 'core/app-bridge'
-import * as SplashScreen from 'expo-splash-screen'
-import { useEffect, useState } from 'react'
-
-// 네이티브 스플래시 옵션 설정
-SplashScreen.setOptions({
-  duration: 1000,  // 1초 페이드 아웃
-  fade: true,      // 페이드 효과 활성화
+// 스플래시 설정
+스플래시옵션설정({
+  페이드시간: 1000,  // 1초 페이드 아웃
+  페이드효과: true
 })
 
-// 자동 숨김 방지 - 직접 제어하기 위함
-SplashScreen.preventAutoHideAsync()
+스플래시.자동숨김방지()  // 수동 제어
 
-const MIN_SPLASH_MS = 4000 // 최소 4초 노출
+const 최소_노출_시간 = 4000 // 4초
 
-const RootLayout = () => {
-  const [isSplashMinShown, setIsSplashMinShown] = useState(false)
+function 루트레이아웃() {
+  const [최소시간충족, set최소시간충족] = useState(false)
 
-  // 브리지를 통해 웹 앱의 로드 상태 구독
-  const { appLoaded, appStartedAt } = useBridge(appBridge, (state) => ({
-    appLoaded: state.appLoaded,
-    appStartedAt: state.appStartedAt,
-  }))
+  // 웹에서 전달받은 상태
+  const { 앱로드완료, 앱시작시간 } = 브리지상태구독()
 
-  // ✅ 조건 1: 최소 스플래시 노출 시간 보장
+  // ✅ 조건 1: 최소 시간 보장
   useEffect(() => {
-    const elapsed = Date.now() - appStartedAt
-    const remaining = Math.max(0, MIN_SPLASH_MS - elapsed)
-    const timer = setTimeout(() => setIsSplashMinShown(true), remaining)
-    return () => clearTimeout(timer)
-  }, [appStartedAt])
+    const 경과시간 = 현재시간() - 앱시작시간
+    const 남은시간 = Math.max(0, 최소_노출_시간 - 경과시간)
 
-  // ✅ 조건 2: 웹 앱 로드 완료 확인
-  // 두 조건이 모두 충족되면 스플래시 숨김
+    타이머(남은시간).then(() => set최소시간충족(true))
+  }, [])
+
+  // ✅ 조건 2: 두 조건 모두 충족 시 스플래시 해제
   useEffect(() => {
-    if (appLoaded && isSplashMinShown) {
-      SplashScreen.hideAsync()
+    if (앱로드완료 && 최소시간충족) {
+      스플래시.숨기기()
     }
-  }, [appLoaded, isSplashMinShown])
+  }, [앱로드완료, 최소시간충족])
 
-  return <Stack screenOptions={{ headerShown: false }} />
+  return <앱화면 />
 }
 ```
 
-### app-bridge.ts: 브리지 상태 정의
+### 브리지 상태 정의
 
 ```typescript
-// apps/native/src/core/app-bridge.ts
-export type AppBridgeState = {
-  appStartedAt: number      // 앱 시작 시간
-  appLoadedAt: number       // 앱 로드 완료 시간
-  appLoaded: boolean        // 웹 앱 로드 완료 여부
-  safeAreaBackgroundColor: string
-  useSafeArea: boolean
+// 네이티브 ↔ 웹 간 공유할 상태 정의
+type 브리지상태 = {
+  앱시작시간: number
+  앱로드완료시간: number
+  앱로드완료: boolean
   // ...
 }
 
-export type AppBridgeAction = {
-  setAppLoaded: () => Promise<void>
-  setSafeAreaBackgroundColor: (color: string) => Promise<void>
-  setUseSafeArea: (use: boolean) => Promise<void>
+type 브리지액션 = {
+  앱로드완료설정: () => void
   // ...
 }
 
-export const appBridge = bridge<AppBridgeState & AppBridgeAction>(({ set }) => ({
-  // 초기 상태
-  appStartedAt: Date.now(),  // 앱 시작 시간 기록
-  appLoadedAt: 0,
-  appLoaded: false,
-  safeAreaBackgroundColor: '#FFFFFF',
-  useSafeArea: true,
+// 브리지 초기화
+브리지생성({
+  // 초기값
+  앱시작시간: 현재시간(),
+  앱로드완료: false,
 
-  // 웹 앱에서 호출할 액션
-  setAppLoaded: async () => {
-    set({ appLoaded: true, appLoadedAt: Date.now() })
-  },
-
-  setSafeAreaBackgroundColor: async (safeAreaBackgroundColor) => {
-    set({ safeAreaBackgroundColor })
-  },
-
-  setUseSafeArea: async (useSafeArea) => {
-    set({ useSafeArea })
-  },
-}))
+  // 웹에서 호출할 수 있는 액션
+  앱로드완료설정: () => {
+    상태업데이트({ 앱로드완료: true, 앱로드완료시간: 현재시간() })
+  }
+})
 ```
 
 ### 작동 원리
 
 스플래시 해제는 **두 가지 조건을 모두 만족**해야 실행됩니다:
 
-1. **시간 조건**: 앱 시작 후 최소 4초 경과 (`isSplashMinShown = true`)
-2. **로딩 조건**: 웹 앱에서 `setAppLoaded(true)` 호출 (`appLoaded = true`)
+1. **시간 조건**: 앱 시작 후 최소 시간 경과 (예: 4초)
+2. **로딩 조건**: 웹 앱에서 로드 완료 신호 전송
 
 ![](/static/images/DEV/splash-ux/to-be-flow-condition.png)
 
 **핵심 장점:**
-- 앱이 **빠르게 로드**되어도 최소 4초는 스플래시를 유지 → 깜빡임 방지
+- 앱이 **빠르게 로드**되어도 최소 시간은 스플래시를 유지 → 깜빡임 방지
 - 앱 로딩이 **오래 걸려도** 로드 완료를 기다림 → 빈 화면 방지
-- `SplashScreen.setOptions`의 `fade: true`로 1초 부드러운 전환
+- 페이드 효과로 부드러운 전환 제공
 
 ## 3. 웹 레이어: 브리지를 통한 로드 완료 신호 전송
 
-### native-bridge-store.provider.tsx: 웹에서 브리지 액션 위임
+### 웹에서 브리지 사용
 
 ```typescript
-// apps/web/src/core/providers/native-bridge-store.provider.tsx
-import { useBridge } from '@webview-bridge/web'
-import { appBridge } from '@native/core/app-bridge'
+// 웹 앱에서 네이티브 브리지 연결
+function 웹브리지프로바이더({ children }) {
+  const 브리지 = 브리지연결()
 
-export const NativeBridgeStoreProvider = ({ children }) => {
-  const webBridge = useBridge(appBridge)
+  const 네이티브상태 = {
+    // 네이티브 상태 구독
+    앱로드완료: 브리지.앱로드완료,
 
-  // 네이티브 브리지 상태를 웹 앱에서 사용 가능하도록 제공
-  const nativeStore = {
-    // 브리지 상태 구독
-    appLoaded: webBridge.appLoaded,
-    safeAreaBackgroundColor: webBridge.safeAreaBackgroundColor,
-    useSafeArea: webBridge.useSafeArea,
-
-    // 브리지 액션 위임
-    setAppLoaded: (isLoaded: boolean) => webBridge.setAppLoaded(isLoaded),
-    setSafeAreaBackgroundColor: (color: string) =>
-      webBridge.setSafeAreaBackgroundColor(color),
-    setUseSafeArea: (use: boolean) =>
-      webBridge.setUseSafeArea(use),
+    // 네이티브 액션 호출
+    앱로드완료알림: () => 브리지.앱로드완료설정()
   }
 
   return (
-    <NativeBridgeContext.Provider value={nativeStore}>
+    <Context.Provider value={네이티브상태}>
       {children}
-    </NativeBridgeContext.Provider>
+    </Context.Provider>
   )
 }
 ```
 
-### use-auth-redirect.ts: 실제 호출 지점
+### 실제 사용 지점
 
 ```typescript
-// apps/layers/features/src/auth/hooks/use-auth-redirect.ts
-import { useNativeBridge } from '@web/core/providers/native-bridge-store.provider'
-
-export const useAuthRedirect = () => {
-  const nativeStore = useNativeBridge()
+// 웹 앱의 초기화 로직
+function 앱초기화훅() {
+  const { 앱로드완료알림 } = 네이티브브리지사용()
 
   useEffect(() => {
-    const handleAuthRedirect = async () => {
+    async function 초기화() {
       try {
-        // 인증 리다이렉트 로직 수행
-        await processAuthRedirect()
+        // 필요한 초기화 작업 (인증, 데이터 로드 등)
+        await 인증처리()
+        await 초기데이터로드()
 
-        // 인증 완료 후 네이티브에 앱 로드 완료 신호 전송
-        await nativeStore.setAppLoaded(true)
+        // ✅ 모든 준비 완료 후 네이티브에 알림
+        앱로드완료알림()
       } catch (error) {
-        // 에러 발생 시에도 스플래시 해제를 위해 신호 전송
-        await nativeStore.setAppLoaded(true)
-
-        if (isRedirectError(error)) {
-          // 에러 처리...
-        }
+        // ⚠️ 에러 발생 시에도 스플래시는 해제
+        앱로드완료알림()
+        에러처리(error)
       }
     }
 
-    handleAuthRedirect()
+    초기화()
   }, [])
 }
 ```
@@ -285,102 +247,58 @@ export const useAuthRedirect = () => {
 ![](/static/images/DEV/splash-ux/to-be-sequence.png)
 
 **핵심 포인트:**
-- 웹 앱이 **실제로 사용 가능한 시점**에 `setAppLoaded(true)` 호출
-- 인증 리다이렉트 흐름이 완료된 후 신호 전송
-- 에러 발생 시에도 스플래시가 영구적으로 남지 않도록 `catch` 블록에서도 호출
+- 웹 앱이 **실제로 사용 가능한 시점**에 로드 완료 신호 전송
+- 필요한 초기화 작업(인증, 데이터 로드 등)이 완료된 후 알림
+- 에러 발생 시에도 스플래시가 영구적으로 남지 않도록 에러 처리 블록에서도 신호 전송
 
 ## 4. 초기 페인트 안정성 향상
 
-### app-bridge.ts: 안전 영역 배경색 상태 관리
+### 안전 영역 배경색 동기화 (선택적)
 
 ```typescript
-export type AppBridgeState = {
-  safeAreaBackgroundColor: string  // 안전 영역 배경색
-  useSafeArea: boolean             // 안전 영역 사용 여부
+// 브리지에 UI 상태 추가 (필요시)
+type 브리지상태 = {
+  배경색: string
   // ...
 }
 
-export const appBridge = bridge<AppBridgeState & AppBridgeAction>(({ set }) => ({
-  safeAreaBackgroundColor: '#FFFFFF',  // 기본값
-  useSafeArea: true,
-
-  setSafeAreaBackgroundColor: async (safeAreaBackgroundColor) => {
-    set({ safeAreaBackgroundColor })
-  },
-
-  setUseSafeArea: async (useSafeArea) => {
-    set({ useSafeArea })
-  },
-}))
-```
-
-### 웹 앱에서 안전 영역 배경색 제어
-
-```typescript
-// 웹 앱에서 페이지별로 배경색 설정
-function HomePage() {
-  const bridge = useBridge(appBridge)
+// 웹에서 페이지별 배경색 제어
+function 페이지() {
+  const { 배경색설정 } = 브리지사용()
 
   useEffect(() => {
-    // 페이지 진입 시 안전 영역 배경색 변경
-    bridge.setSafeAreaBackgroundColor('#F5F5F5')
+    배경색설정('#F5F5F5')  // 페이지 진입 시
 
-    return () => {
-      // 페이지 이탈 시 원래대로
-      bridge.setSafeAreaBackgroundColor('#FFFFFF')
-    }
+    return () => 배경색설정('#FFFFFF')  // 페이지 이탈 시
   }, [])
 
-  return <div>홈 페이지</div>
+  return <div>페이지 내용</div>
 }
 ```
 
-브리지를 통해 안전 영역 배경색을 일관되게 관리함으로써 페이지 전환 시 깜빡임과 레이아웃 점프를 최소화했습니다.
+브리지를 통해 네이티브와 웹의 배경색을 동기화하여 전환 시 깜빡임을 방지할 수 있습니다.
 
-## 5. 스플래시 애니메이션 품질 개선
+## 5. 스플래시 애니메이션 품질 개선 (선택적)
 
-### splash.tsx: Lottie 애니메이션 루프
+### 애니메이션 루프 설정
 
 ```typescript
-import LottieView from 'lottie-react-native';
-
-export const Splash = () => {
-  return (
-    <LottieView
-      source={require('./splash-animation.json')}
-      autoPlay
-      loop // 애니메이션 끊김 없이 계속 재생
-      style={{ width: '100%', height: '100%' }}
-    />
-  );
-};
+// Lottie 등 애니메이션 라이브러리 사용
+<애니메이션뷰
+  소스={애니메이션파일}
+  자동재생
+  반복={true}  // 스플래시가 숨겨질 때까지 반복 재생
+  스타일={전체화면}
+/>
 ```
 
-`loop` 옵션을 활성화하여 오버레이가 해제될 때까지 애니메이션이 자연스럽게 이어지도록 했습니다.
+반복 재생으로 스플래시가 해제될 때까지 끊김 없는 애니메이션을 제공할 수 있습니다.
 
-## 6. 빌드 안정성 패치
+## 6. 기타 고려사항
 
-```json
-{
-  "dependencies": {
-    "react-native": "0.79.6",
-    "lottie-react-native": "7.3.4"
-  }
-}
-```
-
-```json
-{
-  "scripts": {
-    "prebuild": "expo prebuild",
-    "android": "expo run:android",
-    "ios": "expo run:ios"
-  }
-}
-```
-
-- React Native와 Lottie 라이브러리를 최신 안정 버전으로 업그레이드
-- 빌드 스크립트에 `expo prebuild`를 포함하여 네이티브 리소스 동기화 누락 방지
+- 네이티브 라이브러리 버전 호환성 확인
+- 빌드 시 네이티브 리소스 동기화 스크립트 실행
+- 각 플랫폼(iOS/Android)별 스플래시 설정 차이 확인
 
 # 개선 결과
 
@@ -421,31 +339,31 @@ export const Splash = () => {
 - **깜빡임 최소화** - 안전 영역 배경색 일관화로 레이아웃 점프 감소
 
 ### 로딩 경험 개선
-- **최소 4초 노출** - 너무 짧은 스플래시로 인한 깜빡임 방지
-- **이중 조건 체크** - 시간 조건(4초)과 로딩 조건(앱 로드 완료)을 모두 만족해야 해제
-- **1초 페이드 아웃** - `SplashScreen.setOptions`로 자연스러운 전환
+- **최소 노출 시간 보장** - 너무 짧은 스플래시로 인한 깜빡임 방지
+- **이중 조건 체크** - 시간 조건과 로딩 조건을 모두 만족해야 해제
+- **부드러운 전환** - 페이드 아웃 효과로 자연스러운 전환
 - **브리지 기반 제어** - 웹 앱이 실제로 사용 가능한 시점에 네이티브에 알림
 
 ### 안정성 향상
 - **이중 조건 체크** - 시간과 로딩 상태 모두 확인하여 안정적인 스플래시 해제
-- **브리지 기반 통신** - React Native ↔ 웹 앱 간 명확한 상태 공유
-- **네이티브 리소스 동기화** - `expo prebuild`로 빌드 관련 이슈 사전 방지
+- **브리지 기반 통신** - 네이티브 ↔ 웹 간 명확한 상태 공유
+- **네이티브 리소스 동기화** - 빌드 프로세스 안정성 확보
 
 ## 실제 측정 결과
 
 | 지표 | Before | After | 개선 효과 |
 |-----|--------|-------|----------|
 | 초기 흰 화면 노출 | 발생 | 제거 | **네이티브 스플래시 즉시 표시** |
-| 스플래시 최소 시간 | 불안정 | 4초 보장 | **깜빡임 방지** |
-| 페이드 전환 | 없음 | 1초 페이드 | **부드러운 전환** |
+| 스플래시 최소 시간 | 불안정 | 보장 | **깜빡임 방지** |
+| 페이드 전환 | 없음 | 적용 | **부드러운 전환** |
 | 앱 로드 체크 | 없음 | 브리지로 확인 | **정확한 타이밍** |
-| 안전 영역 일관성 | 불안정 | 브리지로 통합 관리 | **시각적 안정성** |
+| UI 일관성 | 불안정 | 통합 관리 | **시각적 안정성** |
 
 # 배운 점
 
 ## 1. 네이티브와 웹의 경계를 이해하기
 
-하이브리드 앱에서는 네이티브 스플래시와 웹뷰 로딩 사이의 간극이 사용자 경험을 크게 좌우합니다. 단순히 WebView의 `onLoad` 이벤트에 의존하면 HTML 문서가 로드된 시점만 알 수 있지, 실제 React 앱이 사용 가능한 시점은 알 수 없습니다. **브리지를 통한 명시적인 신호 전달**이 핵심입니다.
+하이브리드 앱에서는 네이티브 스플래시와 웹뷰 로딩 사이의 간극이 사용자 경험을 크게 좌우합니다. 단순히 웹뷰의 로드 이벤트에 의존하면 HTML 문서가 로드된 시점만 알 수 있지, 실제 앱이 사용 가능한 시점은 알 수 없습니다. **브리지를 통한 명시적인 신호 전달**이 핵심입니다.
 
 ## 2. 타이밍이 전부다
 
@@ -454,40 +372,40 @@ export const Splash = () => {
 - **너무 이르면**: 깜빡임 발생, 불완전한 화면 노출
 - **너무 늦으면**: 답답함, "앱이 느리다"는 인식
 
-우리는 **이중 조건 체크**(최소 4초 + 앱 로드 완료)로 이 균형을 맞췄습니다.
+**이중 조건 체크**(최소 노출 시간 + 앱 로드 완료)로 이 균형을 맞출 수 있습니다.
 
 ## 3. 방어적 프로그래밍의 중요성
 
 ```typescript
 try {
-  await processAuthRedirect()
-  await nativeStore.setAppLoaded(true)
+  await 초기화작업()
+  앱로드완료알림()
 } catch (error) {
-  // 에러 발생 시에도 스플래시 해제!
-  await nativeStore.setAppLoaded(true)
-  // ...
+  // ⚠️ 에러 발생 시에도 스플래시는 해제해야 함
+  앱로드완료알림()
+  에러처리(error)
 }
 ```
 
-네트워크 지연, 인증 실패 등 예상치 못한 상황에서도 사용자가 멈춤 없이 앱을 사용할 수 있도록 `catch` 블록에서도 `setAppLoaded`를 호출하는 것이 중요합니다.
+네트워크 지연, 인증 실패 등 예상치 못한 상황에서도 사용자가 영구적인 로딩 화면에 갇히지 않도록 에러 처리 블록에서도 스플래시 해제 신호를 보내는 것이 중요합니다.
 
 ## 4. 브리지 아키텍처의 위력
 
-`@webview-bridge` 라이브러리를 통해:
-- 네이티브 ↔ 웹 간 **타입 안전한** 통신
-- **양방향 상태 동기화** (네이티브에서 구독, 웹에서 변경)
-- **명확한 책임 분리** (네이티브는 UI 제어, 웹은 비즈니스 로직)
+네이티브와 웹 간의 브리지 패턴을 통해:
+- **양방향 통신** - 네이티브에서 상태 구독, 웹에서 액션 호출
+- **타입 안전성** - 상태와 액션의 명확한 인터페이스 정의
+- **명확한 책임 분리** - 네이티브는 UI 제어, 웹은 비즈니스 로직
 
-이 구조 덕분에 스플래시 타이밍, 안전 영역 배경색 등을 일관되게 관리할 수 있었습니다.
+이 구조로 스플래시 타이밍을 정확히 제어하고 일관된 사용자 경험을 제공할 수 있었습니다.
 
 ## 5. 작은 개선의 누적 효과
 
-- 네이티브 스플래시 추가 (`app.config.ts`)
-- 자동 숨김 방지 (`preventAutoHideAsync`)
-- 최소 노출 시간 설정 (4초)
-- 페이드 효과 (`fade: true, duration: 1000`)
-- 브리지 기반 로드 완료 체크
-- 안전 영역 배경색 통일
+- 네이티브 스플래시 즉시 표시
+- 자동 숨김 방지 및 수동 제어
+- 최소 노출 시간 보장 (예: 4초)
+- 부드러운 전환 효과 (페이드 아웃)
+- 브리지 기반 정확한 타이밍 제어
+- UI 일관성 유지 (배경색 동기화 등)
 
 하나하나는 작은 개선이지만, 이들이 모여 전체적인 사용자 경험을 크게 향상시킵니다.
 
