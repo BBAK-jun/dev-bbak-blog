@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { formatDate } from 'pliny/utils/formatDate'
 import { useCallback, useEffect, useState } from 'react'
 import { useInView } from 'react-intersection-observer'
+
 import Tag from './Tag'
 
 type PostsProps = {

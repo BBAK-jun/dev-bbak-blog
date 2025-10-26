@@ -15,14 +15,9 @@ module.exports = {
   rules: {
     // React
     'react/display-name': 'off',
-    'react/function-component-definition': [
-      'warn',
-      {
-        namedComponents: 'arrow-function',
-        unnamedComponents: 'arrow-function',
-      },
-    ],
-    'react/jsx-filename-extension': ['error', { extensions: ['.jsx', '.tsx'] }],
+    'react/function-component-definition': 'off',
+    'react/no-unescaped-entities': 'off',
+    'react/jsx-filename-extension': ['warn', { extensions: ['.jsx', '.tsx', '.mdx'] }],
     'react/jsx-no-useless-fragment': ['warn', { allowExpressions: true }],
     'react/jsx-props-no-spreading': 'off',
     'react/jsx-pascal-case': 'error',
@@ -37,6 +32,6 @@ module.exports = {
     // JSX A11y
 
     // React refresh
-    'react-refresh/only-export-components': ['warn'],
+    'react-refresh/only-export-components': 'off',
   },
 }

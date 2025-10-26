@@ -3,6 +3,8 @@ module.exports = {
   plugins: ['react', 'jsx-a11y', 'react-refresh', 'import'],
 
   rules: {
+    // Next
+    '@next/next/no-duplicate-head': 'off',
     // React
     'react/jsx-no-target-blank': 'off',
     'react/no-unknown-property': 'off',
@@ -26,12 +28,6 @@ module.exports = {
     // Import
     'import/no-anonymous-default-export': 'warn',
     // React Refresh
-    'react-refresh/only-export-components': [
-      'warn',
-      {
-        allowConstantExport: true,
-        allowExportNames: ['metadata', 'config', 'size'],
-      },
-    ],
+    'react-refresh/only-export-components': 'off',
   },
 }

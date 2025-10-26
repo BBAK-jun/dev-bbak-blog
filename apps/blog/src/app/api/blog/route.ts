@@ -1,6 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
-
 import { getPosts } from 'actions/get-posts'
+import { NextRequest, NextResponse } from 'next/server'
 
 export const GET = async (request: NextRequest) => {
   const { searchParams } = new URL(request.url)

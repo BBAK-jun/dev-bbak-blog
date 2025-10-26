@@ -1,6 +1,6 @@
 'use server'
 
-import { Authors, allAuthors, allBlogs } from 'contentlayer/generated'
+import { allAuthors, allBlogs, Authors } from 'contentlayer/generated'
 import { coreContent } from 'pliny/utils/contentlayer'
 
 export const getPostDetail = async (slug: string) => {

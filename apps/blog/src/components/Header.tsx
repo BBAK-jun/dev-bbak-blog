@@ -1,5 +1,6 @@
 import headerNavLinks from 'data/headerNavLinks'
 import siteMetadata from 'data/siteMetadata'
+
 import Link from './Link'
 import MobileNav from './MobileNav'
 import SearchButton from './SearchButton'

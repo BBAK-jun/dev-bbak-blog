@@ -2,7 +2,6 @@
 
 import { getPosts } from 'actions/get-posts'
 import { allBlogs } from 'contentlayer/generated'
-
 import ListLayout from 'layouts/ListLayout'
 
 type Props = {

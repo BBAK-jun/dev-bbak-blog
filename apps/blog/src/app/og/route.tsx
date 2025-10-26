@@ -1,7 +1,7 @@
 export const runtime = 'edge'
 
-import { ImageResponse } from 'next/og'
 import BlogOGImage from 'components/OpenGraphImage'
+import { ImageResponse } from 'next/og'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)

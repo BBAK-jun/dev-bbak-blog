@@ -2,7 +2,6 @@ module.exports = {
   extends: ['eslint:recommended', 'plugin:import/recommended', 'plugin:prettier/recommended'],
   plugins: ['simple-import-sort'],
 
-  reportUnusedDisableDirectives: true,
 
   env: {
     es2021: true,
@@ -23,7 +22,7 @@ module.exports = {
     // JavaScript
     curly: ['warn', 'all'],
     eqeqeq: 'error',
-    'no-console': ['warn', { allow: ['warn', 'error'] }],
+    'no-console': ['warn', { allow: ['warn', 'error', 'log'] }],
     'no-implicit-coercion': 'error',
     'no-redeclare': 'warn',
     'no-shadow': 'off',
@@ -52,6 +51,7 @@ module.exports = {
     },
     {
       files: ['*.ts?(x)'],
+      parser: '@typescript-eslint/parser',
       extends: [
         'plugin:@typescript-eslint/recommended',
         'plugin:@typescript-eslint/strict',
@@ -62,14 +62,19 @@ module.exports = {
 
       rules: {
         // TypeScript
+        '@typescript-eslint/no-non-null-assertion': 'off',
         '@typescript-eslint/array-type': 'off',
         '@typescript-eslint/consistent-type-definitions': 'off',
         '@typescript-eslint/explicit-function-return-type': 'off',
         '@typescript-eslint/naming-convention': [
-          'error',
+          'warn',
           { selector: 'function', format: ['camelCase', 'PascalCase'] },
           { selector: ['interface', 'typeLike', 'enumMember'], format: ['PascalCase'] },
-          { selector: 'variable', format: ['camelCase', 'UPPER_CASE', 'PascalCase'], leadingUnderscore: 'allow' },
+          {
+            selector: 'variable',
+            format: ['camelCase', 'UPPER_CASE', 'PascalCase', 'snake_case'],
+            leadingUnderscore: 'allow',
+          },
         ],
         '@typescript-eslint/no-dynamic-delete': 'off',
         '@typescript-eslint/no-empty-function': 'off',
@@ -77,13 +82,19 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 'warn',
         '@typescript-eslint/no-invalid-void-type': 'off',
         '@typescript-eslint/no-unused-vars': [
-          'error',
+          'warn',
           {
             args: 'after-used',
             argsIgnorePattern: '^_',
             ignoreRestSiblings: false,
             vars: 'all',
             varsIgnorePattern: '^_',
+          },
+        ],
+        '@typescript-eslint/ban-ts-comment': [
+          'warn',
+          {
+            'ts-expect-error': false,
           },
         ],
         '@typescript-eslint/no-use-before-define': 'off',
